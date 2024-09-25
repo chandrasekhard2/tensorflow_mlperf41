@@ -766,7 +766,9 @@ class XlaSparseDenseMatmulGradWithAdagradAndCsrInputOp
  public:
   explicit XlaSparseDenseMatmulGradWithAdagradAndCsrInputOp(
       OpKernelConstruction* ctx)
-      : XlaSparseDenseMatmulGradWithCsrInputBase(ctx) {}
+      : XlaSparseDenseMatmulGradWithCsrInputBase(ctx) {
+      	OP_REQUIRES_OK(ctx, ctx->GetAttr("epsilon", &epsilon_));
+      }
 
   ~XlaSparseDenseMatmulGradWithAdagradAndCsrInputOp() override = default;
 
@@ -788,6 +790,9 @@ class XlaSparseDenseMatmulGradWithAdagradAndCsrInputOp
       xla::XlaOp accumulator = xla::Parameter(adagrad_optimizer_builder.get(),
                                               2, per_row_shape, "accumulator");
 
+      xla::XlaOp epsilon =
+          xla::ConstantR0(adagrad_optimizer_builder.get(), 1e-8f);
+
       xla::XlaOp learning_rate = xla::Parameter(
           adagrad_optimizer_builder.get(), 3, per_row_shape, "learning_rate");
 
@@ -795,7 +800,7 @@ class XlaSparseDenseMatmulGradWithAdagradAndCsrInputOp
 
       xla::XlaOp updated_embedding_table =
           embedding_table -
-          learning_rate * gradient / xla::Sqrt(new_accumulator);
+	  learning_rate * gradient / (xla::Sqrt(new_accumulator) + epsilon);
 
       // Apply the weight clipping.
       xla::XlaOp clipped_embedding_table = apply_weight_clipping_to_table(
@@ -829,6 +834,7 @@ class XlaSparseDenseMatmulGradWithAdagradAndCsrInputOp
       const XlaSparseDenseMatmulGradWithAdagradAndCsrInputOp&) = delete;
   void operator=(const XlaSparseDenseMatmulGradWithAdagradAndCsrInputOp&) =
       delete;
+  float epsilon_;
 };
 
 REGISTER_XLA_OP(Name("XlaSparseDenseMatmulGradWithAdagradAndCsrInput"),

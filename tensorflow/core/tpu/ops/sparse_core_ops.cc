@@ -127,6 +127,7 @@ REGISTER_OP("XlaSparseDenseMatmulGradWithAdagradAndCsrInput")
     .Output("updated_accumulator: float32")
     .Attr("clip_weight_min: float = -inf")
     .Attr("clip_weight_max: float = inf")
+    .Attr("epsilon: float")
     .Attr("table_name: string")
     .SetShapeFn([](shape_inference::InferenceContext* c) -> Status {
       c->set_output(0, c->input(6));

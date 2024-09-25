@@ -2612,6 +2612,7 @@ def XlaSparseDenseMatmulGradWithAdagradAndStaticBufferSizeOp : TF_Op<"XlaSparseD
     TF_Float32Tensor:$learning_rate,
     TF_Float32Tensor:$embedding_table,
     TF_Float32Tensor:$accumulator,
+    F32Attr:$epsilon,
     TF_Int32Tensor:$num_minibatches_per_physical_sparse_core,
 
     F32Attr:$clip_weight_min,
